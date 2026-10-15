@@ -1,5 +1,5 @@
 const src=require('fs').readFileSync(__dirname+'/index.html','utf8');const core=src.split('/*CORE-START*/')[1].split('/*CORE-END*/')[0];
-const M=new Function(core+';return{parseLen,fmtIn,fmtFtIn,calc,offset}')();let p=0,f=0;
+const M=new Function(core+';return{parseLen,fmtIn,fmtFtIn,calc,offset,rat,rOp,entryRat,mixed}')();let p=0,f=0;
 const eq=(n,a,b)=>{const ok=typeof b==='number'?Math.abs(a-b)<1e-9:a===b;ok?p++:(f++,console.log('FAIL',n,a,'!=',b))};
 const P=M.parseLen;
 eq('ftin',P(`3' 7-5/16"`),43.3125);eq('space',P('7 5/16'),7.3125);eq('dec',P('2.375'),2.375);eq('frac',P('5/16'),.3125);
@@ -11,4 +11,17 @@ eq('neg fmt',M.fmtFtIn(-13.5,16),`-1' 1-1/2"`);eq('tiny neg',M.fmtIn(-0.001,16),
 eq('add',M.calc(`3' 7-5/16"`,'+','7 5/16').v,50.625);eq('sub',M.calc('1','-','2').v,-1);eq('mul',M.calc('7 5/16','*','2').v,14.625);
 eq('div',M.calc("3'",'/','4').v,9);eq('div0',M.calc('3','/','0').err,'Divide by zero');
 eq('off30',M.offset(6,'30').dist,12);eq('shrink30',M.offset(6,'30').shrink,1.5);eq('off45',M.offset(10,45).dist,14.14);eq('sh10',M.offset(4,10).shrink,.25);
+
+const r=M.rat,E=(w,n,d,neg)=>M.entryRat({w,n,d,neg:!!neg});
+const s=(x)=>x?x.n+'/'+x.d:String(x);
+eq('rat red',s(r(6,8)),'3/4');eq('rat neg den',s(r(1,-2)),'-1/2');
+eq('entry mixed',s(E('3','5','16')),'53/16');eq('entry dec',s(E('2.375','','')),'19/8');eq('entry frac only',s(E('','7','8')),'7/8');
+eq('entry neg',s(E('1','1','2',1)),'-3/2');eq('entry noden',E('1','3','').err,'Enter denominator');eq('entry empty',E('','',''),null);
+eq('add example',s(M.rOp(E('3','5','16'),'+',E('1','7','8'))),'83/16');
+eq('sub',s(M.rOp(r(81),'-',r(72))),'9/1');eq('mul',s(M.rOp(r(3,4),'*',r(2,3))),'1/2');eq('div',s(M.rOp(r(3,4),'/',r(3,8))),'2/1');
+eq('div0',M.rOp(r(1),'/',r(0)),null);
+let m=M.mixed(r(83,16),16);eq('mixed',`${m.w} ${m.n}/${m.d} ${m.approx}`,'5 3/16 false');
+m=M.mixed(r(1,3),16);eq('mixed approx',`${m.w} ${m.n}/${m.d} ${m.approx}`,'0 5/16 true');
+m=M.mixed(r(1,3),0);eq('mixed exact',`${m.n}/${m.d}`,'1/3');m=M.mixed(r(-7,4),16);eq('mixed neg',`${m.neg} ${m.w} ${m.n}/${m.d}`,'true 1 3/4');
+m=M.mixed(r(31,32),16);eq('round up whole',`${m.w} ${m.n}`,'1 0');
 console.log(`${p} passed, ${f} failed`);process.exit(f?1:0);

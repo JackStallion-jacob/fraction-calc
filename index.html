@@ -1,64 +1,111 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta name="theme-color" content="#000000">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#cfd2d4">
 <title>Fraction Calc</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Fraction Calc">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font:18px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{display:flex;position:sticky;top:0;background:#111;border-bottom:2px solid #ffd400;z-index:2}
-header button{flex:1;padding:16px 4px;font-size:17px;font-weight:700;background:#111;color:#bbb;border:0}
-header button.on{color:#000;background:#ffd400}
-main{padding:12px;max-width:600px;margin:auto}.tab{display:none}.tab.on{display:block}
-label{display:block;font-weight:700;color:#ffd400;margin:10px 0 4px}
-input,select{width:100%;font-size:24px;padding:12px;background:#1a1a1a;color:#fff;border:2px solid #555;border-radius:10px}
-input:focus{border-color:#ffd400;outline:0}
-.row{display:flex;gap:8px}.row>*{flex:1}
-.btn{font-size:26px;font-weight:800;padding:14px 0;border-radius:10px;border:2px solid #444;background:#222;color:#fff;min-height:56px}
-.btn.op.on{background:#ffd400;color:#000}.btn.go{background:#00c853;color:#000;border-color:#00c853}
-.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.out{margin-top:12px;padding:14px;border:2px solid #ffd400;border-radius:12px;background:#0d0d0d}
-.big{font-size:34px;font-weight:800;color:#ffd400}.sub{font-size:20px;color:#ddd}.err{color:#ff5252;font-weight:700}
-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:19px}td,th{border:1px solid #444;padding:8px;text-align:center}th{background:#222;color:#ffd400}
-.hint{color:#aaa;font-size:15px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#222;
+background:repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 1px,rgba(0,0,0,.05) 1px 2px,rgba(255,255,255,.04) 2px 3px),linear-gradient(180deg,#e2e4e6,#b9bcbf 50%,#d5d7d9);}
+#app{height:100dvh;display:flex;flex-direction:column;padding:6px 10px calc(8px + env(safe-area-inset-bottom));max-width:520px;margin:auto}
+.hdr{height:44px;display:flex;align-items:center;gap:10px}
+.ham{width:40px;height:36px;border:0;background:none;padding:6px}
+.ham i{display:block;height:3px;background:#333;margin:5px 0;border-radius:2px}
+.title{flex:1;text-align:center;font-family:Georgia,serif;font-size:21px;letter-spacing:1px;color:#222}.title b{font-weight:900}
+.unit{font-size:14px;font-weight:800;padding:6px 8px;border-radius:6px;border:1px solid #8a7a00;background:linear-gradient(#ffe866,#e8c400);color:#333;min-width:56px}
+.lcd{height:150px;margin:4px 0 10px;border:3px solid #6d7378;border-radius:4px;background:linear-gradient(180deg,#9fd3e6,#5fa3bd);box-shadow:inset 0 3px 8px rgba(0,0,0,.35);padding:6px 12px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;overflow:hidden}
+.expr{font-size:26px;color:#3e6170;white-space:nowrap;display:flex;align-items:center;gap:6px;min-height:40px}
+.res{font-size:46px;color:#0b0b0b;white-space:nowrap;display:flex;align-items:center;gap:6px;line-height:1}
+.dec{font-size:16px;color:#123;margin-top:2px;min-height:19px}
+.fr{display:inline-flex;flex-direction:column;align-items:center;font-size:.55em;line-height:1.05}
+.fr>span:first-child{border-bottom:2px solid currentColor;padding:0 2px}
+.err{color:#a00;font-size:28px}
+.pad{flex:1;display:flex;gap:12px;min-height:0}
+.lc{flex:0 0 38%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(7,1fr);gap:8px}
+.rc{flex:1;display:flex;flex-direction:column;gap:6px}
+.kp{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:7px}
+.bar{height:6px;border-radius:3px;background:linear-gradient(#777,#444);box-shadow:0 1px 0 #fff;margin:2px 4px}
+.k{border:1px solid #555;border-radius:8px;font-size:30px;color:#111;font-family:inherit;padding:0;
+background:linear-gradient(180deg,#f2f4f5 0%,#c8cdd0 45%,#a9b0b5 55%,#bfc5c9 100%);
+box-shadow:inset 0 1px 0 #fff,0 3px 0 #6c7276,0 4px 5px rgba(0,0,0,.35)}
+.k:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #fff,0 1px 0 #6c7276,0 1px 2px rgba(0,0,0,.35)}
+.lc .k{background:linear-gradient(180deg,#e9eef2,#a9b6bf 50%,#97a5af 55%,#aebac2)}
+.rc .k{background:linear-gradient(180deg,#f1f0ea,#c6c4b6 50%,#b3b1a3 55%,#c4c2b5)}
+.k.w2{grid-column:span 2}
+.k.red{background:linear-gradient(180deg,#ffc9c4,#f07a70 50%,#e45f55 55%,#ef7b71);color:#5a0000}
+.k.pm{background:linear-gradient(180deg,#e8e9f6,#b1b5d0 50%,#9ca1c2 55%,#b3b7d2);font-size:24px}
+.ops{height:72px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.ops .k{font-size:38px;background:linear-gradient(180deg,#e8ebf6,#a9b2cc 50%,#95a0bf 55%,#adb6cf)}
+.ops .k.on{outline:3px solid #2a6fd6}
+.ops .k.eq{background:linear-gradient(180deg,#ffd29a,#f99a3c 50%,#f08422 55%,#f8a050);color:#3a1800}
+svg{width:34px;height:24px}
+.menu{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:5}
+.menu.on{display:block}
+.sheet{position:absolute;inset:0 18% 0 0;max-width:420px;padding:14px;overflow:auto;
+background:repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 1px,rgba(0,0,0,.05) 1px 2px),linear-gradient(180deg,#e4e6e8,#c2c5c8);box-shadow:4px 0 16px rgba(0,0,0,.5)}
+.sheet h2{font-family:Georgia,serif;font-size:22px;margin:4px 0 12px}
+.mi{display:block;width:100%;text-align:left;font-size:20px;padding:14px;margin-bottom:10px}
+.panel{display:none}.panel.on{display:block}
+.panel label{display:block;font-weight:700;margin:12px 0 4px}
+.panel input,.panel select{width:100%;font-size:22px;padding:10px;border-radius:6px;border:2px solid #6d7378;background:#eef6f9}
+.box{margin-top:12px;padding:12px;border:3px solid #6d7378;border-radius:4px;background:linear-gradient(180deg,#9fd3e6,#6fb0c8);box-shadow:inset 0 2px 6px rgba(0,0,0,.3);font-size:18px}
+.box .big{font-size:30px;font-weight:700}
+.panel table{width:100%;border-collapse:collapse;margin-top:12px;font-size:17px;background:#f4f5f6}
+.panel td,.panel th{border:1px solid #888;padding:6px;text-align:center}.panel th{background:#c9ced2}
+.hint{font-size:14px;color:#333;margin-top:8px}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.seg .k{font-size:18px;height:52px}.seg .k.on{background:linear-gradient(180deg,#ffd29a,#f99a3c 50%,#f08422 55%,#f8a050)}
 </style></head><body>
-<header><button data-t="calc" class="on">Calc</button><button data-t="conv">Dec→Frac</button><button data-t="bend">Bending</button></header>
-<main>
-<section id="calc" class="tab on">
-<label>Rounding</label>
-<select id="rnd"><option value="16" selected>Nearest 1/16"</option><option value="8">Nearest 1/8"</option><option value="4">Nearest 1/4"</option><option value="32">Nearest 1/32"</option></select>
-<label for="a">A</label><input id="a" inputmode="text" placeholder="3' 7-5/16&quot;" autocomplete="off">
-<div class="row" style="margin-top:8px"><button class="btn op on" data-op="+">+</button><button class="btn op" data-op="-">−</button><button class="btn op" data-op="*">×</button><button class="btn op" data-op="/">÷</button></div>
-<label for="b">B</label><input id="b" inputmode="text" placeholder="7 5/16" autocomplete="off">
-<div class="hint">× and ÷: B is a plain number (e.g. 3 or 1.5). ÷ by a length gives a ratio.</div>
-<div class="out" id="cout"><div class="hint">Result appears here</div></div>
-<div class="keys">
-<button class="btn k">7</button><button class="btn k">8</button><button class="btn k">9</button><button class="btn k" data-k="'">ft '</button>
-<button class="btn k">4</button><button class="btn k">5</button><button class="btn k">6</button><button class="btn k" data-k='"'>in "</button>
-<button class="btn k">1</button><button class="btn k">2</button><button class="btn k">3</button><button class="btn k">/</button>
-<button class="btn k">0</button><button class="btn k">.</button><button class="btn k" data-k=" ">␣</button><button class="btn k" data-k="-">-</button>
-<button class="btn k" data-k="CLR">CLR</button><button class="btn k" data-k="BS">⌫</button><button class="btn go" id="eq" style="grid-column:span 2">=</button>
+<div id="app">
+ <div class="hdr"><button class="ham" id="ham" aria-label="Menu"><i></i><i></i><i></i></button>
+ <div class="title">FRACTION<b>CALC</b></div><button class="unit" id="unit">IN</button></div>
+ <div class="lcd"><div class="expr" id="expr"></div><div class="res" id="res">0</div><div class="dec" id="dec"></div></div>
+ <div class="pad">
+  <div class="lc">
+   <button class="k red" data-a="C">C</button><button class="k pm" data-a="PM">+/−</button>
+   <button class="k" data-w="1">1</button><button class="k" data-w="2">2</button>
+   <button class="k" data-w="3">3</button><button class="k" data-w="4">4</button>
+   <button class="k" data-w="5">5</button><button class="k" data-w="6">6</button>
+   <button class="k" data-w="7">7</button><button class="k" data-w="8">8</button>
+   <button class="k" data-w="9">9</button><button class="k" data-w="0">0</button>
+   <button class="k" data-w=".">.</button><button class="k" data-bs="w" aria-label="Backspace whole">BS</button>
+  </div>
+  <div class="rc">
+   <div class="kp" id="kn"></div><div class="bar"></div><div class="kp" id="kd"></div>
+  </div>
+ </div>
+ <div class="ops"><button class="k" data-op="+">+</button><button class="k" data-op="-">−</button><button class="k" data-op="*">×</button><button class="k" data-op="/">÷</button><button class="k eq" data-a="EQ">=</button></div>
 </div>
-</section>
-<section id="conv" class="tab">
-<label for="dec">Decimal inches</label><input id="dec" inputmode="decimal" placeholder="2.375">
-<label>Rounding</label><select id="rnd2"><option value="16">1/16"</option><option value="8">1/8"</option><option value="4">1/4"</option><option value="32">1/32"</option><option value="64">1/64"</option></select>
-<div class="out" id="dout"><div class="hint">Type a decimal</div></div>
-</section>
-<section id="bend" class="tab">
-<label for="off">Offset height</label><input id="off" inputmode="text" placeholder="6 or 5-1/2&quot;">
-<label for="ang">Bend angle</label><select id="ang"><option>10</option><option>22.5</option><option selected>30</option><option>45</option><option>60</option></select>
-<div class="out" id="bout"><div class="hint">Enter offset height</div></div>
-<table><tr><th>Angle</th><th>Multiplier</th><th>Shrink / in</th></tr><tbody id="ref"></tbody></table>
-<div class="hint">Distance between marks = offset × multiplier. Total shrink = offset × shrink/in; add shrink to your measurement to the obstacle.</div>
-</section>
-</main>
+<div class="menu" id="menu"><div class="sheet">
+ <div class="panel on" id="p-main"><h2>Menu</h2>
+  <button class="k mi" data-p="p-set">⚙ Rounding &amp; Units</button>
+  <button class="k mi" data-p="p-conv">⇄ Decimal → Fraction</button>
+  <button class="k mi" data-p="p-bend">∠ Conduit Bending</button>
+  <button class="k mi red" data-close>✕ Close</button></div>
+ <div class="panel" id="p-set"><button class="k mi" data-p="p-main">‹ Back</button><h2>Rounding</h2>
+  <div class="seg" id="rseg"><button class="k" data-r="4">1/4</button><button class="k" data-r="8">1/8</button><button class="k on" data-r="16">1/16</button><button class="k" data-r="32">1/32</button></div>
+  <div class="hint">Results that don't land on this fraction are rounded and marked ≈. The exact decimal is always shown.</div>
+  <h2 style="margin-top:18px">Result units</h2>
+  <div class="seg" style="grid-template-columns:1fr 1fr" id="useg"><button class="k on" data-u="in">Inches</button><button class="k" data-u="ft">Ft-In</button></div>
+  <div class="hint">Ft-In shows results of 12" or more as feet and inches (e.g. 4' 2 5/8"). Enter values in inches.</div></div>
+ <div class="panel" id="p-conv"><button class="k mi" data-p="p-main">‹ Back</button><h2>Decimal → Fraction</h2>
+  <label for="dec2">Decimal inches</label><input id="dec2" inputmode="decimal" placeholder="2.375">
+  <label for="rnd2">Precision</label><select id="rnd2"><option value="16">1/16"</option><option value="8">1/8"</option><option value="4">1/4"</option><option value="32">1/32"</option><option value="64">1/64"</option></select>
+  <div class="box" id="dout">Type a decimal</div></div>
+ <div class="panel" id="p-bend"><button class="k mi" data-p="p-main">‹ Back</button><h2>Conduit Offset</h2>
+  <label for="off">Offset height (in)</label><input id="off" placeholder="6 or 5-1/2&quot;">
+  <label for="ang">Bend angle</label><select id="ang"><option>10</option><option>22.5</option><option selected>30</option><option>45</option><option>60</option></select>
+  <div class="box" id="bout">Enter offset height</div>
+  <table><tr><th>Angle</th><th>Multiplier</th><th>Shrink / in</th></tr><tbody id="ref"></tbody></table>
+  <div class="hint">Distance between marks = offset × multiplier. Total shrink = offset × shrink/in; add it to your measurement to the obstacle.</div></div>
+</div></div>
 <script>
 /*CORE-START*/
 const BEND={"10":{m:5.76,s:1/16},"22.5":{m:2.6,s:3/16},"30":{m:2.0,s:1/4},"45":{m:1.414,s:3/8},"60":{m:1.155,s:1/2}};
@@ -83,25 +130,66 @@ function calc(a,op,b){const A=parseLen(a);if(isNaN(A))return{err:'Bad A'};
  if(op==='+')return{v:A+B};if(op==='-')return{v:A-B};if(op==='*')return{v:A*B};
  if(op==='/'){if(B===0)return{err:'Divide by zero'};return{v:A/B}}return{err:'Bad op'}}
 function offset(h,ang){const b=BEND[String(ang)];return{dist:h*b.m,shrink:h*b.s,mult:b.m,spi:b.s}}
+function rat(n,d){if(d===undefined)d=1;if(!d)return null;if(d<0){n=-n;d=-d}const g=gcd(Math.abs(n),d)||1;return{n:n/g,d:d/g}}
+function rAdd(a,b){return rat(a.n*b.d+b.n*a.d,a.d*b.d)}
+function rSub(a,b){return rat(a.n*b.d-b.n*a.d,a.d*b.d)}
+function rMul(a,b){return rat(a.n*b.n,a.d*b.d)}
+function rDiv(a,b){return b.n?rat(a.n*b.d,a.d*b.n):null}
+function rOp(a,op,b){return op==='+'?rAdd(a,b):op==='-'?rSub(a,b):op==='*'?rMul(a,b):rDiv(a,b)}
+function entryRat(e){let w=e.w||'',v;if(!w&&!e.n)return null;
+ if(w==='.'||w==='')v=rat(0);else{const p=w.split('.');const f=p[1]||'';v=rat(parseInt((p[0]||'0')+f,10),Math.pow(10,f.length))}
+ if(e.n){if(!e.d||!+e.d)return{err:'Enter denominator'};v=rAdd(v,rat(+e.n,+e.d))}
+ return e.neg?rat(-v.n,v.d):v}
+function mixed(r,R){let neg=r.n<0,n=Math.abs(r.n),d=r.d,approx=false;
+ if(R&&R%d!==0){const m=Math.round(n/d*R);approx=m*d!==n*R;const q=rat(m,R);n=q.n;d=q.d}
+ return{neg:neg&&n>0,w:Math.floor(n/d),n:n%d,d,approx}}
 /*CORE-END*/
 if(typeof document!=='undefined'){
-const $=id=>document.getElementById(id);let op='+',focus=$('a');
-document.querySelectorAll('header button').forEach(b=>b.onclick=()=>{document.querySelectorAll('header button,.tab').forEach(e=>e.classList.remove('on'));b.classList.add('on');$(b.dataset.t).classList.add('on')});
-document.querySelectorAll('.op').forEach(b=>b.onclick=()=>{document.querySelectorAll('.op').forEach(e=>e.classList.remove('on'));b.classList.add('on');op=b.dataset.op;run()});
-['a','b'].forEach(id=>{$(id).onfocus=()=>focus=$(id);$(id).oninput=run});
-document.querySelectorAll('.k').forEach(b=>b.onclick=()=>{const k=b.dataset.k||b.textContent;if(k==='CLR')focus.value='';else if(k==='BS')focus.value=focus.value.slice(0,-1);else focus.value+=k;run()});
-$('eq').onclick=run;$('rnd').onchange=run;
-function run(){const o=$('cout');if(!$('a').value||!$('b').value){return}const r=calc($('a').value,op,$('b').value);const d=+$('rnd').value;
- if(r.err){o.innerHTML='<div class="err">'+r.err+'</div>';return}
- if(op==='/'&&/['"]/.test($('b').value)){o.innerHTML='<div class="big">'+r.v.toFixed(4)+'</div><div class="sub">ratio</div>';return}
- o.innerHTML='<div class="big">'+fmtFtIn(r.v,d)+'</div><div class="sub">'+fmtIn(r.v,d)+' &nbsp;|&nbsp; '+r.v.toFixed(4)+' in</div><div class="hint">rounded to 1/'+d+'"</div>'}
-function conv(){const x=parseFloat($('dec').value),d=+$('rnd2').value,o=$('dout');if(isNaN(x)){o.innerHTML='<div class="hint">Type a decimal</div>';return}
- const err=Math.round(x*d)/d-x;o.innerHTML='<div class="big">'+fmtIn(x,d)+'</div><div class="sub">'+fmtFtIn(x,d)+'</div><div class="hint">error '+(err>=0?'+':'')+err.toFixed(4)+' in</div>'}
-$('dec').oninput=conv;$('rnd2').onchange=conv;
-function bend(){const h=parseLen($('off').value),o=$('bout');if(isNaN(h)||h<=0){o.innerHTML='<div class="hint">Enter offset height</div>';return}
- const r=offset(h,$('ang').value);o.innerHTML='<div class="sub">Distance between marks</div><div class="big">'+fmtIn(r.dist,16)+'</div><div class="sub">'+r.dist.toFixed(3)+' in (×'+r.mult+')</div><div class="sub" style="margin-top:8px">Total shrink</div><div class="big">'+fmtIn(r.shrink,16)+'</div><div class="sub">'+r.shrink.toFixed(3)+' in ('+fmtIn(r.spi,16)+' per inch)</div>'}
+const $=id=>document.getElementById(id),BS='<svg viewBox="0 0 34 24"><path d="M10 2h21a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H10L1 12z" fill="#111"/><path d="M15 7l10 10M25 7L15 17" stroke="#fff" stroke-width="3"/></svg>';
+['kn','kd'].forEach(id=>{const t=id==='kn'?'n':'d';$(id).innerHTML=[1,2,3,4,5,6,7,8,9,0].map(x=>'<button class="k" data-'+t+'="'+x+'">'+x+'</button>').join('')+'<button class="k w2" data-bs="'+t+'" aria-label="Backspace">'+BS+'</button>'});
+document.querySelector('[data-bs=w]').innerHTML=BS;
+let R=16,unit='in',e={w:'',n:'',d:'',neg:false},acc=null,op=null,expr=[],fresh=false;
+const OPS={'+':'+','-':'−','*':'×','/':'÷'};
+function frHTML(m,ft){let s=m.neg?'−':'';let w=m.w;
+ if(ft&&unit==='ft'&&(w>=12)){s+=Math.floor(w/12)+'\'&nbsp;';w=w%12}
+ if(w||!m.n)s+=w;if(m.n)s+='<span class="fr"><span>'+m.n+'</span><span>'+m.d+'</span></span>';
+ return s+(ft&&unit==='ft'?'"':'')}
+function ratHTML(r,round,ft){const m=mixed(r,round?R:0);return(m.approx?'≈':'')+frHTML(m,ft)}
+function entryHTML(){if(!e.w&&!e.n&&!e.d)return e.neg?'−':'';let s=(e.neg?'−':'')+e.w;if(e.n||e.d)s+='<span class="fr"><span>'+(e.n||'&nbsp;')+'</span><span>'+(e.d||'&nbsp;')+'</span></span>';return s}
+function show(res,decTxt){$('expr').innerHTML=expr.join('&nbsp;');$('res').innerHTML=res;$('dec').textContent=decTxt||''}
+function cur(){show(entryHTML()||(acc&&!op?ratHTML(acc,1,1):'0'),'')}
+function clearE(){e={w:'',n:'',d:'',neg:false}}
+function key(b){const d=b.dataset;if(fresh&&(d.w!==undefined||d.n!==undefined||d.d!==undefined)){acc=null;expr=[];fresh=false}
+ if(d.w!==undefined){if(d.w==='.'&&e.w.includes('.'))return;if(e.w.length<7)e.w+=d.w}
+ else if(d.n!==undefined){if(e.n.length<4)e.n+=d.n}else if(d.d!==undefined){if(e.d.length<4)e.d+=d.d}
+ else if(d.bs){e[d.bs]=e[d.bs].slice(0,-1)}
+ else if(d.a==='C'){if(e.w||e.n||e.d||e.neg)clearE();else{acc=null;op=null;expr=[]};fresh=false}
+ else if(d.a==='PM'){if(fresh&&acc){acc=rat(-acc.n,acc.d);expr=[];fresh=false;show(ratHTML(acc,1,1),dec(acc));return}e.neg=!e.neg}
+ else if(d.op){const v=entryRat(e);if(v&&v.err)return show('<span class="err">'+v.err+'</span>');
+  if(v){if(acc&&op){const r=rOp(acc,op,v);if(!r){return err()}acc=r}else acc=v}
+  if(!acc)return;op=d.op;expr=[ratHTML(acc,0,0),OPS[op]];clearE();fresh=false;mark();cur();return}
+ else if(d.a==='EQ'){const v=entryRat(e);if(v&&v.err)return show('<span class="err">'+v.err+'</span>');if(!acc||!op||!v)return;
+  const r=rOp(acc,op,v);if(!r)return err();expr=[ratHTML(acc,0,0),OPS[op],ratHTML(v,0,0),'='];acc=r;op=null;clearE();fresh=true;mark();show(ratHTML(r,1,1),dec(r));return}
+ cur()}
+function dec(r){const x=r.n/r.d;return '= '+(+x.toFixed(6))+' in'+(unit==='ft'&&Math.abs(x)>=12?'  ('+(+(x/12).toFixed(4))+' ft)':'')}
+function err(){acc=null;op=null;expr=[];clearE();mark();show('<span class="err">Can\'t divide by 0</span>')}
+function mark(){document.querySelectorAll('[data-op]').forEach(b=>b.classList.toggle('on',b.dataset.op===op))}
+document.querySelectorAll('#app .k').forEach(b=>b.addEventListener('click',()=>key(b)));
+function rerender(){if(fresh&&acc)show(ratHTML(acc,1,1),dec(acc));else cur()}
+$('unit').onclick=()=>setU(unit==='in'?'ft':'in');
+function setU(u){unit=u;$('unit').textContent=u==='in'?'IN':'FT-IN';document.querySelectorAll('#useg .k').forEach(b=>b.classList.toggle('on',b.dataset.u===u));rerender()}
+document.querySelectorAll('#useg .k').forEach(b=>b.onclick=()=>setU(b.dataset.u));
+document.querySelectorAll('#rseg .k').forEach(b=>b.onclick=()=>{R=+b.dataset.r;document.querySelectorAll('#rseg .k').forEach(x=>x.classList.toggle('on',x===b));rerender()});
+const menu=$('menu');function panel(p){document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('on',x.id===p))}
+$('ham').onclick=()=>{panel('p-main');menu.classList.add('on')};
+menu.onclick=ev=>{if(ev.target===menu||ev.target.closest('[data-close]'))menu.classList.remove('on');const p=ev.target.closest('[data-p]');if(p)panel(p.dataset.p)};
+function conv(){const x=parseFloat($('dec2').value),d=+$('rnd2').value,o=$('dout');if(isNaN(x)){o.textContent='Type a decimal';return}
+ const er=Math.round(x*d)/d-x;o.innerHTML='<div class="big">'+fmtIn(x,d)+'</div><div>'+fmtFtIn(x,d)+'</div><div class="hint">error '+(er>=0?'+':'')+er.toFixed(4)+' in</div>'}
+$('dec2').oninput=conv;$('rnd2').onchange=conv;
+function bend(){const h=parseLen($('off').value),o=$('bout');if(isNaN(h)||h<=0){o.textContent='Enter offset height';return}
+ const r=offset(h,$('ang').value);o.innerHTML='<div>Distance between marks</div><div class="big">'+fmtIn(r.dist,16)+'</div><div>'+r.dist.toFixed(3)+' in (×'+r.mult+')</div><div style="margin-top:8px">Total shrink</div><div class="big">'+fmtIn(r.shrink,16)+'</div><div>'+r.shrink.toFixed(3)+' in ('+fmtIn(r.spi,16)+' per inch)</div>'}
 $('off').oninput=bend;$('ang').onchange=bend;
-$('ref').innerHTML=['10','22.5','30','45','60'].map(a=>[a,BEND[a]]).map(([a,b])=>'<tr><td>'+a+'°</td><td>'+b.m+'</td><td>'+fmtIn(b.s,16)+'</td></tr>').join('');
+$('ref').innerHTML=['10','22.5','30','45','60'].map(a=>'<tr><td>'+a+'°</td><td>'+BEND[a].m+'</td><td>'+fmtIn(BEND[a].s,16)+'</td></tr>').join('');
+if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js');
 }
-if(typeof navigator!=='undefined'&&'serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js');
 </script></body></html>

@@ -1,4 +1,10 @@
 const {chromium}=require('playwright');(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:390,height:844},deviceScaleFactor:2});
-await p.goto('file://'+__dirname+'/index.html');await p.fill('#a',`3' 7-5/16"`);await p.fill('#b','7 5/16');await p.click('#eq');await p.screenshot({path:'shot-calc.png'});
-await p.click('[data-t=conv]');await p.fill('#dec','2.37');await p.screenshot({path:'shot-convert.png'});
-await p.click('[data-t=bend]');await p.fill('#off','6');await p.screenshot({path:'shot-bending.png'});await b.close()})();
+p.on('pageerror',e=>console.log('ERR',e.message));
+await p.goto('file://'+__dirname+'/index.html');const c=s=>p.click(s);
+await c('[data-w="3"]');await c('#kn [data-n="5"]');await c('#kd [data-d="1"]');await c('#kd [data-d="6"]');await c('[data-op="+"]');
+await c('[data-w="1"]');await c('#kn [data-n="7"]');await c('#kd [data-d="8"]');await c('[data-a=EQ]');
+console.log('scroll',await p.evaluate(()=>document.documentElement.scrollHeight));
+await p.screenshot({path:'shot-calc.png'});await c('#ham');await p.screenshot({path:'shot-menu.png'});
+await c('[data-p=p-conv]');await p.fill('#dec2','2.37');await p.screenshot({path:'shot-convert.png'});
+await c('#p-conv [data-p=p-main]');await c('[data-p=p-bend]');await p.fill('#off','6');await p.screenshot({path:'shot-bending.png'});
+await c('#p-bend [data-p=p-main]');await c('[data-p=p-set]');await p.screenshot({path:'shot-settings.png'});await b.close()})();

@@ -1,5 +1,5 @@
 const src=require('fs').readFileSync(__dirname+'/index.html','utf8');const core=src.split('/*CORE-START*/')[1].split('/*CORE-END*/')[0];
-const M=new Function(core+';return{parseLen,fmtIn,fmtFtIn,calc,offset,rat,rOp,entryRat,mixed}')();let p=0,f=0;
+const M=new Function(core+';return{parseLen,fmtIn,fmtFtIn,calc,offset,rat,rOp,entryRat,mixed,histAdd,histLoad}')();let p=0,f=0;
 const eq=(n,a,b)=>{const ok=typeof b==='number'?Math.abs(a-b)<1e-9:a===b;ok?p++:(f++,console.log('FAIL',n,a,'!=',b))};
 const P=M.parseLen;
 eq('ftin',P(`3' 7-5/16"`),43.3125);eq('space',P('7 5/16'),7.3125);eq('dec',P('2.375'),2.375);eq('frac',P('5/16'),.3125);
@@ -24,4 +24,10 @@ let m=M.mixed(r(83,16),16);eq('mixed',`${m.w} ${m.n}/${m.d} ${m.approx}`,'5 3/16
 m=M.mixed(r(1,3),16);eq('mixed approx',`${m.w} ${m.n}/${m.d} ${m.approx}`,'0 5/16 true');
 m=M.mixed(r(1,3),0);eq('mixed exact',`${m.n}/${m.d}`,'1/3');m=M.mixed(r(-7,4),16);eq('mixed neg',`${m.neg} ${m.w} ${m.n}/${m.d}`,'true 1 3/4');
 m=M.mixed(r(31,32),16);eq('round up whole',`${m.w} ${m.n}`,'1 0');
+
+let h=[];for(let i=0;i<105;i++)h=M.histAdd(h,{r:{n:i,d:1}},100);
+eq('hist cap',h.length,100);eq('hist newest first',h[0].r.n,104);eq('hist oldest kept',h[99].r.n,5);
+eq('hist immut',M.histAdd([],{r:{n:1,d:1}}).length,1);
+eq('load bad',M.histLoad('{oops').length,0);eq('load null',M.histLoad(null).length,0);eq('load obj',M.histLoad('{"a":1}').length,0);
+eq('load roundtrip',M.histLoad(JSON.stringify(h)).length,100);eq('load filters junk',M.histLoad('[{"r":{"n":1,"d":2}},5,null,{}]').length,1);
 console.log(`${p} passed, ${f} failed`);process.exit(f?1:0);

@@ -21,7 +21,7 @@ background:repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 1px,rgba(0,0,0
 .ham i{display:block;height:3px;background:#333;margin:5px 0;border-radius:2px}
 .title{flex:1;text-align:center;font-family:Georgia,serif;font-size:21px;letter-spacing:1px;color:#222}.title b{font-weight:900}
 .unit{font-size:14px;font-weight:800;padding:6px 8px;border-radius:6px;border:1px solid #8a7a00;background:linear-gradient(#ffe866,#e8c400);color:#333;min-width:56px}
-.lcd{flex:0 0 auto;height:clamp(78px,15vh,140px);margin:2px 0 clamp(4px,1.2vh,10px);border:3px solid #6d7378;border-radius:4px;background:linear-gradient(180deg,#9fd3e6,#5fa3bd);box-shadow:inset 0 3px 8px rgba(0,0,0,.35);padding:6px 12px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;overflow:hidden}
+.lcd{position:relative;z-index:4;cursor:pointer;flex:0 0 auto;height:clamp(78px,15vh,140px);margin:2px 0 clamp(4px,1.2vh,10px);border:3px solid #6d7378;border-radius:4px;background:linear-gradient(180deg,#9fd3e6,#5fa3bd);box-shadow:inset 0 3px 8px rgba(0,0,0,.35);padding:6px 12px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;overflow:hidden}
 .expr{font-size:clamp(16px,3vh,26px);color:#3e6170;white-space:nowrap;display:flex;align-items:center;gap:6px;min-height:1.4em}
 .res{font-size:clamp(28px,5.4vh,46px);color:#0b0b0b;white-space:nowrap;display:flex;align-items:center;gap:6px;line-height:1}
 .dec{font-size:clamp(12px,1.9vh,16px);color:#123;margin-top:2px;min-height:19px}
@@ -62,11 +62,27 @@ background:repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 1px,rgba(0,0,0
 .panel td,.panel th{border:1px solid #888;padding:6px;text-align:center}.panel th{background:#c9ced2}
 .hint{font-size:14px;color:#333;margin-top:8px}
 .seg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.seg .k{font-size:18px;height:52px}.seg .k.on{background:linear-gradient(180deg,#ffd29a,#f99a3c 50%,#f08422 55%,#f8a050)}
+#app{position:relative}
+.hico{position:absolute;left:8px;top:6px;width:22px;height:22px;opacity:.6}
+#hback{position:fixed;inset:0;z-index:3;display:none}#hback.on{display:block}
+#hist{position:absolute;left:10px;right:10px;z-index:4;display:flex;flex-direction:column;border:3px solid #6d7378;border-top:0;border-radius:0 0 6px 6px;
+background:linear-gradient(180deg,#8ec6da,#5fa3bd);box-shadow:inset 0 3px 8px rgba(0,0,0,.3),0 8px 16px rgba(0,0,0,.4);
+clip-path:inset(0 0 100% 0);transition:clip-path .28s ease;pointer-events:none}
+#hist.on{clip-path:inset(0 0 -20px 0);pointer-events:auto}
+.hbar{display:flex;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid #4d8399}
+.hbar b{flex:1;font-size:17px;color:#123}.hbar button{font-size:15px;padding:8px 10px}
+#hlist{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.he{display:block;width:100%;text-align:right;background:none;border:0;border-bottom:1px solid rgba(0,0,0,.15);padding:8px 12px;font-family:inherit;color:#0b0b0b}
+.he:active{background:rgba(255,255,255,.25)}.he .x{font-size:20px;color:#3e6170;display:flex;justify-content:flex-end;align-items:center;gap:5px}
+.he .y{font-size:26px;display:flex;justify-content:flex-end;align-items:center;gap:5px}.he .z{font-size:13px;color:#123}
+.hempty{padding:20px;text-align:center;color:#123}
 </style></head><body>
 <div id="app">
  <div class="hdr"><button class="ham" id="ham" aria-label="Menu"><i></i><i></i><i></i></button>
  <div class="title">FRACTION<b>CALC</b></div><button class="unit" id="unit">IN</button></div>
- <div class="lcd"><div class="expr" id="expr"></div><div class="res" id="res">0</div><div class="dec" id="dec"></div></div>
+ <div class="lcd" id="lcd" title="Tap for history"><svg class="hico" viewBox="0 0 24 24" fill="none" stroke="#173c4a" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg><div class="expr" id="expr"></div><div class="res" id="res">0</div><div class="dec" id="dec"></div></div>
+ <div id="hback"></div>
+ <div id="hist" aria-hidden="true"><div class="hbar"><b>History</b><button class="k red" id="hclr">Clear history</button><button class="k" id="hx" aria-label="Close">✕</button></div><div id="hlist"></div></div>
  <div class="pad">
   <div class="lc">
    <button class="k red" data-a="C">C</button><button class="k pm" data-a="PM">+/−</button>
@@ -143,6 +159,8 @@ function entryRat(e){let w=e.w||'',v;if(!w&&!e.n)return null;
 function mixed(r,R){let neg=r.n<0,n=Math.abs(r.n),d=r.d,approx=false;
  if(R&&R%d!==0){const m=Math.round(n/d*R);approx=m*d!==n*R;const q=rat(m,R);n=q.n;d=q.d}
  return{neg:neg&&n>0,w:Math.floor(n/d),n:n%d,d,approx}}
+function histAdd(list,item,cap){cap=cap||100;return[item].concat(list||[]).slice(0,cap)}
+function histLoad(str){try{const v=JSON.parse(str);return Array.isArray(v)?v.filter(x=>x&&x.r&&x.r.d).slice(0,100):[]}catch(e){return[]}}
 /*CORE-END*/
 if(typeof document!=='undefined'){
 const $=id=>document.getElementById(id),BS='<svg viewBox="0 0 34 24"><path d="M10 2h21a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H10L1 12z" fill="#111"/><path d="M15 7l10 10M25 7L15 17" stroke="#fff" stroke-width="3"/></svg>';
@@ -169,8 +187,19 @@ function key(b){const d=b.dataset;if(fresh&&(d.w!==undefined||d.n!==undefined||d
   if(v){if(acc&&op){const r=rOp(acc,op,v);if(!r){return err()}acc=r}else acc=v}
   if(!acc)return;op=d.op;expr=[ratHTML(acc,0,0),OPS[op]];clearE();fresh=false;mark();cur();return}
  else if(d.a==='EQ'){const v=entryRat(e);if(v&&v.err)return show('<span class="err">'+v.err+'</span>');if(!acc||!op||!v)return;
-  const r=rOp(acc,op,v);if(!r)return err();expr=[ratHTML(acc,0,0),OPS[op],ratHTML(v,0,0),'='];acc=r;op=null;clearE();fresh=true;mark();show(ratHTML(r,1,1),dec(r));return}
+  const r=rOp(acc,op,v);if(!r)return err();expr=[ratHTML(acc,0,0),OPS[op],ratHTML(v,0,0),'='];const it={a:acc,op,b:v,r};hist=histAdd(hist,it,100);saveH();acc=r;op=null;clearE();fresh=true;mark();show(ratHTML(r,1,1),dec(r));return}
  cur()}
+let hist=[];try{hist=histLoad(localStorage.getItem('fc-history'))}catch(_){}
+function saveH(){try{localStorage.setItem('fc-history',JSON.stringify(hist))}catch(_){}}
+const H=$('hist'),HB=$('hback');
+function placeH(){const l=$('lcd'),a=$('app').getBoundingClientRect(),b=l.getBoundingClientRect();H.style.top=(b.bottom-a.top-3)+'px';H.style.bottom=Math.max(8,a.bottom-a.top-(a.bottom-a.top))+'px'}
+function renderH(){$('hlist').innerHTML=hist.length?hist.map((h,i)=>'<button class="he" data-i="'+i+'"><div class="x">'+ratHTML(h.a,0,0)+' '+OPS[h.op]+' '+ratHTML(h.b,0,0)+' =</div><div class="y">'+ratHTML(h.r,1,1)+'</div><div class="z">'+dec(h.r)+'</div></button>').join(''):'<div class="hempty">No calculations yet</div>'}
+function openH(){placeH();renderH();$('hlist').scrollTop=0;H.classList.add('on');HB.classList.add('on');H.setAttribute('aria-hidden','false')}
+function closeH(){H.classList.remove('on');HB.classList.remove('on');H.setAttribute('aria-hidden','true')}
+$('lcd').onclick=()=>H.classList.contains('on')?closeH():openH();HB.onclick=closeH;$('hx').onclick=closeH;
+$('hclr').onclick=()=>{hist=[];saveH();renderH()};
+$('hlist').onclick=ev=>{const b=ev.target.closest('.he');if(!b)return;const h=hist[+b.dataset.i];acc=rat(h.r.n,h.r.d);op=null;expr=[];clearE();fresh=true;mark();show(ratHTML(acc,1,1),dec(acc));closeH()};
+addEventListener('resize',()=>{if(H.classList.contains('on'))placeH()});
 function dec(r){const x=r.n/r.d;return '= '+(+x.toFixed(6))+' in'+(unit==='ft'&&Math.abs(x)>=12?'  ('+(+(x/12).toFixed(4))+' ft)':'')}
 function err(){acc=null;op=null;expr=[];clearE();mark();show('<span class="err">Can\'t divide by 0</span>')}
 function mark(){document.querySelectorAll('[data-op]').forEach(b=>b.classList.toggle('on',b.dataset.op===op))}

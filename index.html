@@ -15,25 +15,25 @@
 html,body{margin:0;height:100%;overflow:hidden}
 body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#222;
 background:repeating-linear-gradient(0deg,rgba(255,255,255,.08) 0 1px,rgba(0,0,0,.05) 1px 2px,rgba(255,255,255,.04) 2px 3px),linear-gradient(180deg,#e2e4e6,#b9bcbf 50%,#d5d7d9);}
-#app{height:100dvh;display:flex;flex-direction:column;padding:6px 10px calc(8px + env(safe-area-inset-bottom));max-width:520px;margin:auto}
-.hdr{height:44px;display:flex;align-items:center;gap:10px}
+#app{height:100vh;height:100dvh;height:calc(var(--vh,1dvh)*100);display:flex;flex-direction:column;padding:4px 10px calc(6px + env(safe-area-inset-bottom));padding-top:max(4px,env(safe-area-inset-top));max-width:520px;margin:auto;overflow:hidden}
+.hdr{flex:0 0 auto;height:clamp(34px,5.5vh,44px);display:flex;align-items:center;gap:10px}
 .ham{width:40px;height:36px;border:0;background:none;padding:6px}
 .ham i{display:block;height:3px;background:#333;margin:5px 0;border-radius:2px}
 .title{flex:1;text-align:center;font-family:Georgia,serif;font-size:21px;letter-spacing:1px;color:#222}.title b{font-weight:900}
 .unit{font-size:14px;font-weight:800;padding:6px 8px;border-radius:6px;border:1px solid #8a7a00;background:linear-gradient(#ffe866,#e8c400);color:#333;min-width:56px}
-.lcd{height:150px;margin:4px 0 10px;border:3px solid #6d7378;border-radius:4px;background:linear-gradient(180deg,#9fd3e6,#5fa3bd);box-shadow:inset 0 3px 8px rgba(0,0,0,.35);padding:6px 12px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;overflow:hidden}
-.expr{font-size:26px;color:#3e6170;white-space:nowrap;display:flex;align-items:center;gap:6px;min-height:40px}
-.res{font-size:46px;color:#0b0b0b;white-space:nowrap;display:flex;align-items:center;gap:6px;line-height:1}
-.dec{font-size:16px;color:#123;margin-top:2px;min-height:19px}
+.lcd{flex:0 0 auto;height:clamp(78px,15vh,140px);margin:2px 0 clamp(4px,1.2vh,10px);border:3px solid #6d7378;border-radius:4px;background:linear-gradient(180deg,#9fd3e6,#5fa3bd);box-shadow:inset 0 3px 8px rgba(0,0,0,.35);padding:6px 12px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;overflow:hidden}
+.expr{font-size:clamp(16px,3vh,26px);color:#3e6170;white-space:nowrap;display:flex;align-items:center;gap:6px;min-height:1.4em}
+.res{font-size:clamp(28px,5.4vh,46px);color:#0b0b0b;white-space:nowrap;display:flex;align-items:center;gap:6px;line-height:1}
+.dec{font-size:clamp(12px,1.9vh,16px);color:#123;margin-top:2px;min-height:19px}
 .fr{display:inline-flex;flex-direction:column;align-items:center;font-size:.55em;line-height:1.05}
 .fr>span:first-child{border-bottom:2px solid currentColor;padding:0 2px}
 .err{color:#a00;font-size:28px}
-.pad{flex:1;display:flex;gap:12px;min-height:0}
-.lc{flex:0 0 38%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(7,1fr);gap:8px}
-.rc{flex:1;display:flex;flex-direction:column;gap:6px}
-.kp{flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,1fr);gap:7px}
+.pad{flex:1 1 0;display:flex;gap:12px;min-height:0}
+.lc{flex:0 0 38%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(7,minmax(0,1fr));gap:clamp(4px,1vh,8px)}
+.rc{flex:1;display:flex;flex-direction:column;gap:clamp(3px,.7vh,6px);min-height:0}
+.kp{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,minmax(0,1fr));gap:clamp(4px,.9vh,7px)}
 .bar{height:6px;border-radius:3px;background:linear-gradient(#777,#444);box-shadow:0 1px 0 #fff;margin:2px 4px}
-.k{border:1px solid #555;border-radius:8px;font-size:30px;color:#111;font-family:inherit;padding:0;
+.k{min-height:0;line-height:1;overflow:hidden;border:1px solid #555;border-radius:8px;font-size:clamp(20px,3.6vh,30px);color:#111;font-family:inherit;padding:0;
 background:linear-gradient(180deg,#f2f4f5 0%,#c8cdd0 45%,#a9b0b5 55%,#bfc5c9 100%);
 box-shadow:inset 0 1px 0 #fff,0 3px 0 #6c7276,0 4px 5px rgba(0,0,0,.35)}
 .k:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #fff,0 1px 0 #6c7276,0 1px 2px rgba(0,0,0,.35)}
@@ -42,11 +42,11 @@ box-shadow:inset 0 1px 0 #fff,0 3px 0 #6c7276,0 4px 5px rgba(0,0,0,.35)}
 .k.w2{grid-column:span 2}
 .k.red{background:linear-gradient(180deg,#ffc9c4,#f07a70 50%,#e45f55 55%,#ef7b71);color:#5a0000}
 .k.pm{background:linear-gradient(180deg,#e8e9f6,#b1b5d0 50%,#9ca1c2 55%,#b3b7d2);font-size:24px}
-.ops{height:72px;display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
-.ops .k{font-size:38px;background:linear-gradient(180deg,#e8ebf6,#a9b2cc 50%,#95a0bf 55%,#adb6cf)}
+.ops{flex:0 0 auto;height:clamp(48px,8.5vh,72px);display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:clamp(6px,1.4vh,12px)}
+.ops .k{font-size:clamp(26px,4.4vh,38px);background:linear-gradient(180deg,#e8ebf6,#a9b2cc 50%,#95a0bf 55%,#adb6cf)}
 .ops .k.on{outline:3px solid #2a6fd6}
 .ops .k.eq{background:linear-gradient(180deg,#ffd29a,#f99a3c 50%,#f08422 55%,#f8a050);color:#3a1800}
-svg{width:34px;height:24px}
+svg{width:clamp(24px,4vh,34px);height:auto;max-height:70%}
 .menu{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:5}
 .menu.on{display:block}
 .sheet{position:absolute;inset:0 18% 0 0;max-width:420px;padding:14px;overflow:auto;
@@ -190,6 +190,7 @@ function bend(){const h=parseLen($('off').value),o=$('bout');if(isNaN(h)||h<=0){
  const r=offset(h,$('ang').value);o.innerHTML='<div>Distance between marks</div><div class="big">'+fmtIn(r.dist,16)+'</div><div>'+r.dist.toFixed(3)+' in (×'+r.mult+')</div><div style="margin-top:8px">Total shrink</div><div class="big">'+fmtIn(r.shrink,16)+'</div><div>'+r.shrink.toFixed(3)+' in ('+fmtIn(r.spi,16)+' per inch)</div>'}
 $('off').oninput=bend;$('ang').onchange=bend;
 $('ref').innerHTML=['10','22.5','30','45','60'].map(a=>'<tr><td>'+a+'°</td><td>'+BEND[a].m+'</td><td>'+fmtIn(BEND[a].s,16)+'</td></tr>').join('');
+function setVH(){document.documentElement.style.setProperty('--vh',(window.visualViewport?visualViewport.height:innerHeight)/100+'px')}setVH();addEventListener('resize',setVH);addEventListener('orientationchange',setVH);if(window.visualViewport)visualViewport.addEventListener('resize',setVH);
 if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js');
 }
 </script></body></html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#000000">
+<title>Fraction Calc</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Fraction Calc">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font:18px/1.3 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;position:sticky;top:0;background:#111;border-bottom:2px solid #ffd400;z-index:2}
+header button{flex:1;padding:16px 4px;font-size:17px;font-weight:700;background:#111;color:#bbb;border:0}
+header button.on{color:#000;background:#ffd400}
+main{padding:12px;max-width:600px;margin:auto}.tab{display:none}.tab.on{display:block}
+label{display:block;font-weight:700;color:#ffd400;margin:10px 0 4px}
+input,select{width:100%;font-size:24px;padding:12px;background:#1a1a1a;color:#fff;border:2px solid #555;border-radius:10px}
+input:focus{border-color:#ffd400;outline:0}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.btn{font-size:26px;font-weight:800;padding:14px 0;border-radius:10px;border:2px solid #444;background:#222;color:#fff;min-height:56px}
+.btn.op.on{background:#ffd400;color:#000}.btn.go{background:#00c853;color:#000;border-color:#00c853}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.out{margin-top:12px;padding:14px;border:2px solid #ffd400;border-radius:12px;background:#0d0d0d}
+.big{font-size:34px;font-weight:800;color:#ffd400}.sub{font-size:20px;color:#ddd}.err{color:#ff5252;font-weight:700}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:19px}td,th{border:1px solid #444;padding:8px;text-align:center}th{background:#222;color:#ffd400}
+.hint{color:#aaa;font-size:15px}
+</style></head><body>
+<header><button data-t="calc" class="on">Calc</button><button data-t="conv">Dec→Frac</button><button data-t="bend">Bending</button></header>
+<main>
+<section id="calc" class="tab on">
+<label>Rounding</label>
+<select id="rnd"><option value="16" selected>Nearest 1/16"</option><option value="8">Nearest 1/8"</option><option value="4">Nearest 1/4"</option><option value="32">Nearest 1/32"</option></select>
+<label for="a">A</label><input id="a" inputmode="text" placeholder="3' 7-5/16&quot;" autocomplete="off">
+<div class="row" style="margin-top:8px"><button class="btn op on" data-op="+">+</button><button class="btn op" data-op="-">−</button><button class="btn op" data-op="*">×</button><button class="btn op" data-op="/">÷</button></div>
+<label for="b">B</label><input id="b" inputmode="text" placeholder="7 5/16" autocomplete="off">
+<div class="hint">× and ÷: B is a plain number (e.g. 3 or 1.5). ÷ by a length gives a ratio.</div>
+<div class="out" id="cout"><div class="hint">Result appears here</div></div>
+<div class="keys">
+<button class="btn k">7</button><button class="btn k">8</button><button class="btn k">9</button><button class="btn k" data-k="'">ft '</button>
+<button class="btn k">4</button><button class="btn k">5</button><button class="btn k">6</button><button class="btn k" data-k='"'>in "</button>
+<button class="btn k">1</button><button class="btn k">2</button><button class="btn k">3</button><button class="btn k">/</button>
+<button class="btn k">0</button><button class="btn k">.</button><button class="btn k" data-k=" ">␣</button><button class="btn k" data-k="-">-</button>
+<button class="btn k" data-k="CLR">CLR</button><button class="btn k" data-k="BS">⌫</button><button class="btn go" id="eq" style="grid-column:span 2">=</button>
+</div>
+</section>
+<section id="conv" class="tab">
+<label for="dec">Decimal inches</label><input id="dec" inputmode="decimal" placeholder="2.375">
+<label>Rounding</label><select id="rnd2"><option value="16">1/16"</option><option value="8">1/8"</option><option value="4">1/4"</option><option value="32">1/32"</option><option value="64">1/64"</option></select>
+<div class="out" id="dout"><div class="hint">Type a decimal</div></div>
+</section>
+<section id="bend" class="tab">
+<label for="off">Offset height</label><input id="off" inputmode="text" placeholder="6 or 5-1/2&quot;">
+<label for="ang">Bend angle</label><select id="ang"><option>10</option><option>22.5</option><option selected>30</option><option>45</option><option>60</option></select>
+<div class="out" id="bout"><div class="hint">Enter offset height</div></div>
+<table><tr><th>Angle</th><th>Multiplier</th><th>Shrink / in</th></tr><tbody id="ref"></tbody></table>
+<div class="hint">Distance between marks = offset × multiplier. Total shrink = offset × shrink/in; add shrink to your measurement to the obstacle.</div>
+</section>
+</main>
+<script>
+/*CORE-START*/
+const BEND={"10":{m:5.76,s:1/16},"22.5":{m:2.6,s:3/16},"30":{m:2.0,s:1/4},"45":{m:1.414,s:3/8},"60":{m:1.155,s:1/2}};
+function num(t){t=t.trim();if(!t)return NaN;let m;
+ if(/^\d*\.?\d+$/.test(t))return parseFloat(t);
+ if(m=t.match(/^(\d+)\/(\d+)$/))return +m[2]?m[1]/m[2]:NaN;
+ if(m=t.match(/^(\d+)(?:\s+|-)(\d+)\/(\d+)$/))return +m[3]?+m[1]+m[2]/m[3]:NaN;
+ return NaN}
+function parseLen(s){if(s==null)return NaN;s=String(s).trim().replace(/[”″]/g,'"').replace(/[’′]/g,"'").replace(/\s*(in|inch|inches)$/i,'"');
+ let neg=false;if(s.startsWith('-')){neg=true;s=s.slice(1).trim()}if(!s)return NaN;
+ let ft=0,inch=s,i=s.indexOf("'");
+ if(i>=0){ft=num(s.slice(0,i));inch=s.slice(i+1).trim().replace(/^-\s*/,'');if(isNaN(ft))return NaN}
+ inch=inch.replace(/"\s*$/,'').trim();let v=inch?num(inch):0;if(isNaN(v)||/["']/.test(inch))return NaN;
+ const r=ft*12+v;return neg?-r:r}
+function gcd(a,b){while(b){[a,b]=[b,a%b]}return a}
+function fracParts(x,d){const neg=x<0;let n=Math.round(Math.abs(x)*d);const w=Math.floor(n/d);let r=n%d,dd=d;if(r){const g=gcd(r,dd);r/=g;dd/=g}return{neg:neg&&n>0,w,r,d:dd}}
+function fmtIn(x,d){const p=fracParts(x,d);let s=(p.r?(p.w?p.w+'-':'')+p.r+'/'+p.d:''+p.w)+'"';return(p.neg?'-':'')+s}
+function fmtFtIn(x,d){const neg=x<0;const n=Math.round(Math.abs(x)*d);const ft=Math.floor(n/(12*d));const rest=(n-ft*12*d)/d;
+ const s=(ft?ft+"' ":'')+fmtIn(rest,d);return(neg&&n>0?'-':'')+s}
+function calc(a,op,b){const A=parseLen(a);if(isNaN(A))return{err:'Bad A'};
+ const B=(op==='*'||op==='/')?parseLen(b):parseLen(b);if(isNaN(B))return{err:'Bad B'};
+ if(op==='+')return{v:A+B};if(op==='-')return{v:A-B};if(op==='*')return{v:A*B};
+ if(op==='/'){if(B===0)return{err:'Divide by zero'};return{v:A/B}}return{err:'Bad op'}}
+function offset(h,ang){const b=BEND[String(ang)];return{dist:h*b.m,shrink:h*b.s,mult:b.m,spi:b.s}}
+/*CORE-END*/
+if(typeof document!=='undefined'){
+const $=id=>document.getElementById(id);let op='+',focus=$('a');
+document.querySelectorAll('header button').forEach(b=>b.onclick=()=>{document.querySelectorAll('header button,.tab').forEach(e=>e.classList.remove('on'));b.classList.add('on');$(b.dataset.t).classList.add('on')});
+document.querySelectorAll('.op').forEach(b=>b.onclick=()=>{document.querySelectorAll('.op').forEach(e=>e.classList.remove('on'));b.classList.add('on');op=b.dataset.op;run()});
+['a','b'].forEach(id=>{$(id).onfocus=()=>focus=$(id);$(id).oninput=run});
+document.querySelectorAll('.k').forEach(b=>b.onclick=()=>{const k=b.dataset.k||b.textContent;if(k==='CLR')focus.value='';else if(k==='BS')focus.value=focus.value.slice(0,-1);else focus.value+=k;run()});
+$('eq').onclick=run;$('rnd').onchange=run;
+function run(){const o=$('cout');if(!$('a').value||!$('b').value){return}const r=calc($('a').value,op,$('b').value);const d=+$('rnd').value;
+ if(r.err){o.innerHTML='<div class="err">'+r.err+'</div>';return}
+ if(op==='/'&&/['"]/.test($('b').value)){o.innerHTML='<div class="big">'+r.v.toFixed(4)+'</div><div class="sub">ratio</div>';return}
+ o.innerHTML='<div class="big">'+fmtFtIn(r.v,d)+'</div><div class="sub">'+fmtIn(r.v,d)+' &nbsp;|&nbsp; '+r.v.toFixed(4)+' in</div><div class="hint">rounded to 1/'+d+'"</div>'}
+function conv(){const x=parseFloat($('dec').value),d=+$('rnd2').value,o=$('dout');if(isNaN(x)){o.innerHTML='<div class="hint">Type a decimal</div>';return}
+ const err=Math.round(x*d)/d-x;o.innerHTML='<div class="big">'+fmtIn(x,d)+'</div><div class="sub">'+fmtFtIn(x,d)+'</div><div class="hint">error '+(err>=0?'+':'')+err.toFixed(4)+' in</div>'}
+$('dec').oninput=conv;$('rnd2').onchange=conv;
+function bend(){const h=parseLen($('off').value),o=$('bout');if(isNaN(h)||h<=0){o.innerHTML='<div class="hint">Enter offset height</div>';return}
+ const r=offset(h,$('ang').value);o.innerHTML='<div class="sub">Distance between marks</div><div class="big">'+fmtIn(r.dist,16)+'</div><div class="sub">'+r.dist.toFixed(3)+' in (×'+r.mult+')</div><div class="sub" style="margin-top:8px">Total shrink</div><div class="big">'+fmtIn(r.shrink,16)+'</div><div class="sub">'+r.shrink.toFixed(3)+' in ('+fmtIn(r.spi,16)+' per inch)</div>'}
+$('off').oninput=bend;$('ang').onchange=bend;
+$('ref').innerHTML=['10','22.5','30','45','60'].map(a=>[a,BEND[a]]).map(([a,b])=>'<tr><td>'+a+'°</td><td>'+b.m+'</td><td>'+fmtIn(b.s,16)+'</td></tr>').join('');
+}
+if(typeof navigator!=='undefined'&&'serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js');
+</script></body></html>

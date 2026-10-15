@@ -1,0 +1,14 @@
+const src=require('fs').readFileSync(__dirname+'/index.html','utf8');const core=src.split('/*CORE-START*/')[1].split('/*CORE-END*/')[0];
+const M=new Function(core+';return{parseLen,fmtIn,fmtFtIn,calc,offset}')();let p=0,f=0;
+const eq=(n,a,b)=>{const ok=typeof b==='number'?Math.abs(a-b)<1e-9:a===b;ok?p++:(f++,console.log('FAIL',n,a,'!=',b))};
+const P=M.parseLen;
+eq('ftin',P(`3' 7-5/16"`),43.3125);eq('space',P('7 5/16'),7.3125);eq('dec',P('2.375'),2.375);eq('frac',P('5/16'),.3125);
+eq('ft',P("3'"),36);eq('ft-dash',P("3'-6\""),42);eq('neg',P('-1/2'),-.5);eq('in word',P('4 in'),4);eq('ftnosp',P("2'4"),28);
+eq('bad',isNaN(P('abc')),true);eq('bad0',isNaN(P('1/0')),true);eq('empty',isNaN(P('')),true);eq('quote dup',isNaN(P('3"4"')),true);
+eq('fmt',M.fmtIn(7.3125,16),'7-5/16"');eq('fmt red',M.fmtIn(2.375,16),'2-3/8"');eq('fmt round8',M.fmtIn(7.3125,8),'7-3/8"');
+eq('fmt whole',M.fmtIn(0.99,16),'1"');eq('ftin fmt',M.fmtFtIn(43.3125,16),`3' 7-5/16"`);eq('ftin 12',M.fmtFtIn(11.99,16),`1' 0"`);
+eq('neg fmt',M.fmtFtIn(-13.5,16),`-1' 1-1/2"`);eq('tiny neg',M.fmtIn(-0.001,16),'0"');
+eq('add',M.calc(`3' 7-5/16"`,'+','7 5/16').v,50.625);eq('sub',M.calc('1','-','2').v,-1);eq('mul',M.calc('7 5/16','*','2').v,14.625);
+eq('div',M.calc("3'",'/','4').v,9);eq('div0',M.calc('3','/','0').err,'Divide by zero');
+eq('off30',M.offset(6,'30').dist,12);eq('shrink30',M.offset(6,'30').shrink,1.5);eq('off45',M.offset(10,45).dist,14.14);eq('sh10',M.offset(4,10).shrink,.25);
+console.log(`${p} passed, ${f} failed`);process.exit(f?1:0);
